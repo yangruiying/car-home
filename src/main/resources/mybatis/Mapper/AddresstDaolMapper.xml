@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.platform.idleplatform.address.dao.AddressDao">
+    <!--新增地址-->
+    <insert id="addAddress" parameterType="com.platform.idleplatform.address.entity.AddressInfo">
+        insert into
+        t_address
+        values
+        (
+        #{addressId},
+        #{userId},
+        #{name},
+        #{phone},
+        #{privinceId},
+        #{cityId},
+        #{regionId},
+        #{detailAddress},
+        now()
+        )
+    </insert>
+
+    <!--省市市区查询-->
+    <select id="listArea" parameterType="java.lang.String"
+            resultType="com.platform.idleplatform.address.entity.DictionariesInfo">
+        select
+        id,
+        value
+        from
+        t_dictionaries
+        where parent_id=#{id}
+    </select>
+
+    <!--查询用户地址列表-->
+    <select id="userAddress" parameterType="java.lang.String"
+            resultType="com.platform.idleplatform.address.entity.AddressInfo">
+        SELECT
+        address_id,
+        name,
+        phone,
+        a.`value` privinceName,
+        b.`value` cityName,
+        c.`value` regionName,
+        detail_address
+        FROM
+        t_dictionaries a,
+        t_dictionaries b,
+        t_dictionaries c,
+        t_address d
+        WHERE
+        d.privince_id = a.id
+        AND d.city_id = b.id
+        AND d.region_id = c.id
+        AND d.user_id = #{userId}
+    </select>
+</mapper>

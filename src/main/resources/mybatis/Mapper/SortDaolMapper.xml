@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.platform.idleplatform.sort.dao.SortDao">
+
+    <resultMap id="base" type="com.platform.idleplatform.sort.entity.SortInfo">
+        <result column="first_char" property="firstChar"></result>
+        <collection property="firstSortList" column="first_char" javaType="java.util.ArrayList" select="getFirstChar"></collection>
+    </resultMap>
+    <select id="getFirstSort" resultMap="base">
+    SELECT
+        first_char
+    FROM
+        t_sort
+    WHERE
+        parent_id = 0
+    GROUP BY
+        first_char
+    </select>
+    <!--获取一级分类-->
+    <select id="getFirstChar" resultType="com.platform.idleplatform.sort.entity.SortInfo">
+        select
+        name,
+        sort_id,
+        first_char,
+        car_icon
+        from
+        t_sort
+        where
+        first_char = #{first_char}
+    </select>
+    <resultMap id="BaseTreeResultMap" type="com.platform.idleplatform.sort.entity.SortInfo">
+        <result column="sort_id" property="sortId"></result>
+        <collection property="goodsList" column="sort_id" javaType="java.util.ArrayList" select="getNextNodeTree"/>
+    </resultMap>
+    <!--获取二级分类-->
+    <select id="getSecondSort" parameterType="java.lang.String" resultMap="BaseTreeResultMap">
+        select
+        name,
+        sort_id
+        from
+        t_sort
+        where
+        parent_id = #{sortId}
+    </select>
+
+    <!--获取二级分类和商品-->
+    <select id="getNextNodeTree" resultType="com.platform.idleplatform.sort.entity.GoodsListInfo">
+        SELECT
+        a.goods_id goodsId,
+        t_user.user_id userId,
+        user_name,
+        image_path,
+        title,
+        intro,
+        url indexPath,
+        price
+        FROM
+        t_goods a,
+        t_image,
+        t_user
+        WHERE
+        a.goods_id = t_image.goods_id
+        AND goods_order = 0
+        AND second_sort = #{sortId}
+        AND a.user_id = t_user.user_id
+        AND (a.state != -1 AND a.state != 2)
+    </select>
+</mapper>

@@ -1,0 +1,528 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.platform.idleplatform.goods.dao.GoodsDao">
+    <!--获取商品-->
+    <select id="listGoodsByPage" parameterType="com.platform.idleplatform.goods.entity.GoodsInfo"
+            resultType="com.platform.idleplatform.goods.entity.GoodsInfo">
+        SELECT
+        t_goods.goods_id goodsId,
+        title,
+        intro,
+        url indexPath,
+        price,
+        t_goods.user_id,
+        image_path,
+        user_name,
+        a.`name` firstSortName,
+        b.`name` secondSortName,
+        state,
+        (
+        SELECT
+        COUNT(*)
+        FROM
+        t_favor b
+        WHERE
+        t_goods.goods_id = b.goods_id
+        ) favor,
+        t_goods.update_time
+        FROM
+        t_goods,
+        t_image,
+        t_user,
+        t_sort a,
+        t_sort b
+        WHERE
+        t_goods.goods_id = t_image.goods_id
+        AND goods_order = 0
+        AND t_user.user_id = t_goods.user_id
+        AND t_goods.first_sort = a.sort_id
+        AND t_goods.second_sort = b.sort_id
+        <if test="state != 0 ">
+            AND state = #{state}
+        </if>
+        <if test="title != null">
+            AND title LIKE concat ('%',#{title},'%')
+        </if>
+        ORDER BY
+        t_goods.update_time DESC
+
+    </select>
+
+    <!--获取商品-->
+    <select id="getAttenGoodsList" parameterType="java.lang.String"
+            resultType="com.platform.idleplatform.goods.entity.GoodsInfo">
+        SELECT
+        t_goods.goods_id goodsId,
+        title,
+        intro,
+        url indexPath,
+        price,
+        t_goods.user_id,
+        t_goods.user_id own,
+        image_path,
+        user_name,
+        (
+        SELECT
+        COUNT(*)
+        FROM
+        t_favor b
+        WHERE
+        t_goods.goods_id = b.goods_id
+        ) favor
+        FROM
+        t_goods,
+        t_image,
+        t_user
+        WHERE
+        t_goods.goods_id = t_image.goods_id
+        AND goods_order = 0
+        AND t_user.user_id = t_goods.user_id
+        AND t_goods.user_id in (SELECT fans user_id FROM t_fans WHERE user_id = #{userId})
+        AND (t_goods.state != -1 AND t_goods.state != 2)
+    </select>
+
+    <!--根据获取商品详情信息-->
+    <select id="getGoodsQuery" resultType="com.platform.idleplatform.goods.entity.GoodsInfo">
+        SELECT
+        t_goods.goods_id goodsId,
+        title,
+        intro,
+        url indexPath,
+        price,
+        t_goods.user_id,
+        image_path,
+        user_name,
+        first_sort,
+        second_sort
+        FROM
+        t_goods,
+        t_image,
+        t_user
+        WHERE
+        t_goods.goods_id = t_image.goods_id
+        AND goods_order = 0
+        AND t_user.user_id = t_goods.user_id
+        AND t_goods.goods_id = #{goodsId}
+    </select>
+
+    <!--发布商品-->
+    <insert id="addGoods" parameterType="com.platform.idleplatform.goods.entity.GoodsInfo">
+        insert into
+        t_goods
+        (
+        goods_id,
+        title,
+        city_name,
+        shipping,
+        iniPrice,
+        price,
+        intro,
+        user_id,
+        state,
+        first_sort,
+        second_sort,
+        update_time
+        )
+        values (
+        #{goodsId},
+        #{title},
+        #{cityName},
+        #{shipping},
+        #{iniPrice},
+        #{price},
+        #{intro},
+        #{userId},
+        -1,
+        #{firstSort},
+        #{secondSort},
+        now()
+        )
+    </insert>
+
+    <!--添加照片-->
+    <insert id="addImage" parameterType="com.platform.idleplatform.goods.entity.GoodsInfo">
+        <foreach collection="url" item="item" index="index" separator=";">
+            insert into
+            t_image
+            (goods_id,
+            url,
+            goods_order)
+            values
+            (
+            #{goodsId},
+            #{item},
+            #{index})
+        </foreach>
+    </insert>
+
+    <!--获取图片列表-->
+    <select id="getImgList" parameterType="java.lang.String"
+            resultType="com.platform.idleplatform.goods.entity.ImgList">
+        select
+        url
+        from
+        t_image
+        where
+        goods_id =#{goodsId}
+    </select>
+
+    <!--获取发布的商品-->
+    <select id="getGoodsById" parameterType="java.lang.String"
+            resultType="com.platform.idleplatform.goods.entity.GoodsInfo">
+        SELECT
+        t_goods.goods_id goodsId,
+        title,
+        intro,
+        url indexPath,
+        price,
+        t_goods.user_id,
+        image_path,
+        user_name
+        FROM
+        t_goods,
+        t_image,
+        t_user
+        WHERE
+        t_goods.goods_id = t_image.goods_id
+        AND goods_order = 0
+        AND t_user.user_id = t_goods.user_id
+        AND t_user.user_id = #{userId}
+    </select>
+
+    <!--判断是否是自己的商品-->
+    <select id="getIsUserGoods" parameterType="com.platform.idleplatform.goods.entity.GoodsInfo"
+            resultType="java.lang.Integer">
+        select
+        count(*)
+        from
+        t_goods
+        where
+        goods_id = #{goodsId}
+        AND
+        user_id = #{userId}
+    </select>
+
+    <!--商品留言-->
+    <insert id="addLeaveMessage" parameterType="com.platform.idleplatform.goods.entity.GoodsInfo">
+        insert into
+        t_leaveMessage
+        (
+        l_id,
+        message,
+        user_id,
+        goods_id,
+        parent_id,
+        update_time
+        )
+        values
+        (
+        #{lId},
+        #{message},
+        #{userId},
+        #{goodsId},
+        0,
+        now()
+        )
+    </insert>
+
+    <resultMap id="BaseTreeResultMap" type="com.platform.idleplatform.goods.entity.GoodsInfo">
+        <result column="l_id" property="lId"></result>
+        <collection property="recoverList" column="l_id" javaType="java.util.ArrayList" select="getNextNodeTree"/>
+    </resultMap>
+    <!--获取商品留言-->
+    <select id="getLeaveMessage" parameterType="java.lang.String" resultMap="BaseTreeResultMap">
+        select
+        l_id,
+        message,
+        user_name,
+        image_path
+        from
+        t_leaveMessage a,
+        t_user b
+        where
+        goods_id = #{goodsId}
+        AND
+        a.user_id = b.user_id
+        AND
+        parent_id = 0
+        order by
+        a.update_time
+        desc
+    </select>
+
+
+    <!--获取二级分类-->
+    <select id="getNextNodeTree" parameterType="java.lang.String" resultMap="BaseTreeResultMap">
+        SELECT
+        a.l_id,
+        a.message,
+        b.user_name,
+        b.image_path,
+        d.user_name recover_name
+        FROM
+        t_leaveMessage a,
+        t_user b,
+        t_leaveMessage c,
+        t_user d
+        WHERE
+        a.user_id = b.user_id
+        AND a.parent_id = c.l_id
+        AND c.user_id = d.user_id
+        AND a.parent_id = #{lId}
+        ORDER BY
+        a.update_time DESC
+    </select>
+
+    <!--新增回复-->
+    <insert id="addRecover" parameterType="com.platform.idleplatform.goods.entity.GoodsInfo">
+        insert into
+        t_leaveMessage
+        (
+        l_id,
+        message,
+        user_id,
+        goods_id,
+        parent_id,
+        update_time
+        )
+        values
+        (
+        #{lId},
+        #{message},
+        #{userId},
+        #{goodsId},
+        #{parentId},
+        now()
+        )
+    </insert>
+
+    <!--修改商品状态-->
+    <update id="updateGoodsStatus" parameterType="com.platform.idleplatform.goods.entity.GoodsInfo">
+        UPDATE
+        t_goods
+        SET
+        state = #{state}
+        WHERE
+        goods_id
+        IN
+        <foreach collection="goodsIdList" index="index" item="item" open="(" separator="," close=")">
+            #{item}
+        </foreach>
+    </update>
+
+    <!--获取等待审核的商品-->
+    <select id="listCheckByPage" resultType="com.platform.idleplatform.goods.entity.GoodsInfo">
+        SELECT
+        t_goods.goods_id goodsId,
+        title,
+        intro,
+        url indexPath,
+        price,
+        t_goods.user_id,
+        image_path,
+        user_name,
+        a.`name` firstSortName,
+        b.`name` secondSortName,
+        state,
+        (
+        SELECT
+        COUNT(*)
+        FROM
+        t_favor b
+        WHERE
+        t_goods.goods_id = b.goods_id
+        ) favor,
+        t_goods.update_time
+        FROM
+        t_goods,
+        t_image,
+        t_user,
+        t_sort a,
+        t_sort b
+        WHERE
+        t_goods.goods_id = t_image.goods_id
+        AND goods_order = 0
+        AND t_user.user_id = t_goods.user_id
+        AND t_goods.first_sort = a.sort_id
+        AND t_goods.second_sort = b.sort_id
+        AND t_goods.state = -1
+        ORDER BY
+        t_goods.update_time DESC
+    </select>
+
+    <!--更新商品信息-->
+    <update id="updateGoodsInfo" parameterType="com.platform.idleplatform.goods.entity.GoodsInfo">
+        update
+        t_goods
+        set
+        title = #{title},
+        city_name = #{cityName},
+        price = #{price},
+        iniPrice = #{iniPrice},
+        intro = #{intro},
+        first_sort = #{firstSort},
+        second_sort = #{secondSort},
+        update_time = now(),
+        state = -1
+        where
+        goods_id = #{goodsId}
+    </update>
+
+    <!--删除图片-->
+    <delete id="delImg" parameterType="java.lang.String">
+        delete from
+        t_image
+        where
+        goods_id = #{goodsId}
+    </delete>
+
+    <!--获取同城商品-->
+    <select id="getGoodsByCity" parameterType="java.lang.String"
+            resultType="com.platform.idleplatform.goods.entity.GoodsInfo">
+        SELECT
+        t_goods.goods_id goodsId,
+        url indexPath,
+        price,
+        update_time
+        FROM
+        t_goods,
+        t_image
+        WHERE
+        t_goods.goods_id = t_image.goods_id
+        AND goods_order = 0
+        AND city_name = #{cityName}
+        ORDER BY
+        t_goods.update_time DESC
+    </select>
+
+    <!--获取商品详情-->
+    <select id="getGoodsDetail" parameterType="java.lang.String"
+            resultType="com.platform.idleplatform.goods.entity.GoodsInfo">
+        SELECT
+        t_goods.goods_id goodsId,
+        title,
+        intro,
+        url indexPath,
+        price,
+        shipping,
+        iniPrice,
+        t_goods.user_id,
+        image_path,
+        user_name,
+        a.`name` firstSortName,
+        b.`name` secondSortName,
+        first_sort,
+        second_sort,
+        state,
+        (
+        SELECT
+        COUNT(*)
+        FROM
+        t_favor b
+        WHERE
+        t_goods.goods_id = b.goods_id
+        ) favor,
+        t_goods.update_time
+        FROM
+        t_goods,
+        t_image,
+        t_user,
+        t_sort a,
+        t_sort b
+        WHERE
+        t_goods.goods_id = t_image.goods_id
+        AND goods_order = 0
+        AND t_user.user_id = t_goods.user_id
+        AND t_goods.first_sort = a.sort_id
+        AND t_goods.second_sort = b.sort_id
+        AND t_goods.goods_id = #{goodsId}
+        ORDER BY
+        t_goods.update_time DESC
+    </select>
+
+    <!--获取最新发布-->
+    <select id="getNew" resultType="com.platform.idleplatform.goods.entity.GoodsInfo">
+        SELECT
+        t_goods.goods_id goodsId,
+        url indexPath,
+        price,
+        update_time
+        FROM
+        t_goods,
+        t_image
+        WHERE
+        t_goods.goods_id = t_image.goods_id
+        AND goods_order = 0
+        ORDER BY
+        t_goods.update_time DESC
+    </select>
+
+    <select id="getHotGoods" resultType="com.platform.idleplatform.goods.entity.GoodsInfo">
+        SELECT
+        t_goods.goods_id goodsId,
+        url indexPath,
+        price,
+        (
+        SELECT
+        count(*)
+        FROM
+        t_favor
+        WHERE
+        t_favor.goods_id = t_goods.goods_id
+        ) favorNum,
+        update_time
+        FROM
+        t_goods,
+        t_image
+        WHERE
+        t_goods.goods_id = t_image.goods_id
+        AND goods_order = 0
+        ORDER BY
+        favorNum DESC
+    </select>
+
+    <insert id="addBrower" parameterType="com.platform.idleplatform.goods.entity.GoodsInfo">
+        insert into
+        t_brower
+        (
+        user_id,
+        goods_id,
+        update_time
+        )values
+        (
+        #{userId},
+        #{goodsId},
+        now()
+        )
+    </insert>
+
+    <!--获取收藏数量-->
+    <select id="getCollection" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select
+        count(*)
+        from
+        t_collection
+        where
+        user_id = #{userId}
+    </select>
+
+    <!--获取收藏列表-->
+    <select id="getCollectionList" parameterType="java.lang.String"
+            resultType="com.platform.idleplatform.goods.entity.GoodsInfo">
+        SELECT
+        t_goods.goods_id goodsId,
+        title,
+        url indexPath,
+        price
+        FROM
+        t_goods,
+        t_image,
+        t_collection
+        WHERE
+        t_goods.goods_id = t_image.goods_id
+        AND goods_order = 0
+        AND t_collection.goods_id = t_goods.goods_id
+        ORDER BY
+        t_collection.update_time DESC
+    </select>
+</mapper>

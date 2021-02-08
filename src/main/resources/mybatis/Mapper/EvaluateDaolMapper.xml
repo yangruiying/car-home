@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.platform.idleplatform.evaluate.dao.EvaluateDao">
+    <!--新增评价-->
+    <insert id="addEvaluate" parameterType="com.platform.idleplatform.evaluate.entity.EvaluateInfo">
+        insert into
+        t_evaluate
+        (
+        evaluate_id,
+        rate,
+        user_id,
+        message,
+        update_time,
+        goods_id
+        )
+        values
+        (
+        #{evaluateId},
+        #{rate},
+        #{userId},
+        #{message},
+        now(),
+        #{goodsId}
+        )
+    </insert>
+
+    <!--查询评价-->
+    <select id="getEvaluate" parameterType="java.lang.String"
+            resultType="com.platform.idleplatform.evaluate.entity.EvaluateInfo">
+        SELECT
+        message,
+        (
+        SELECT
+        url
+        FROM
+        t_image
+        WHERE
+        t_image.goods_id = b.goods_id
+        ORDER BY
+        goods_order
+        LIMIT 0,
+        1
+        ) indexPath
+        FROM
+        t_evaluate a,
+        t_goods b
+        WHERE
+        a.goods_id = b.goods_id
+        AND
+        b.user_id = #{userId}
+        ORDER BY
+        a.update_time
+        DESC
+    </select>
+</mapper>

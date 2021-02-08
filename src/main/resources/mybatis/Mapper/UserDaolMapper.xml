@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.platform.idleplatform.user.dao.UserDao">
+    <!--获取用户信息-->
+    <select id="getUserInfo" parameterType="java.lang.String"
+            resultType="com.platform.idleplatform.user.entity.UserInfo">
+        select
+        user_id,
+        user_name,
+        image_path,
+        role
+        from
+        t_user
+        where
+        user_id = #{userId}
+    </select>
+
+    <!--新增关注-->
+    <insert id="addFans" parameterType="com.platform.idleplatform.user.entity.FansInfo">
+        insert into
+        t_fans(
+        user_id,
+        fans,
+        update_time,
+        is_delete
+        )values(
+        #{userId},
+        #{fans},
+        now(),
+        0
+        )
+    </insert>
+
+    <!--取消关注-->
+    <update id="cancelFans" parameterType="com.platform.idleplatform.user.entity.FansInfo">
+        delete from
+        t_fans
+        where
+        user_id = #{userId}
+        and
+        fans = #{fans}
+    </update>
+
+    <!--检查关注-->
+    <select id="isFans" parameterType="com.platform.idleplatform.user.entity.FansInfo" resultType="java.lang.Integer">
+        select
+        count(*)
+        from
+        t_fans
+        where
+        user_id = #{userId}
+        AND
+        fans = #{fans}
+    </select>
+
+    <!--查询粉丝数量-->
+    <select id="getFansNum" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select
+        count(*)
+        from
+        t_fans
+        where
+        fans = #{userId}
+    </select>
+
+    <!--查询关注的数量-->
+    <select id="getAttenNum" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select
+        count(*)
+        from
+        t_fans
+        where
+        user_id = #{userId}
+    </select>
+
+    <!--获取用户粉丝数-->
+    <select id="getFans" resultType="com.platform.idleplatform.user.entity.UserInfo">
+        SELECT
+        image_path,
+        (
+        SELECT
+        count(*)
+        FROM
+        t_fans
+        WHERE
+        a.user_id = t_fans.fans
+        ) fans,
+        user_id
+        FROM
+        t_user a
+        ORDER BY
+        fans DESC
+    </select>
+
+    <!--添加用户-->
+    <insert id="addUser" parameterType="com.platform.idleplatform.user.entity.UserInfo">
+        insert into
+        t_user
+        (
+        user_id,
+        account,
+        password,
+        user_name,
+        image_path,
+        role,
+        update_time
+        )
+        values
+        (
+        #{userId},
+        #{account},
+        #{password},
+        #{userName},
+        #{imagePath},
+        #{role},
+        now()
+        )
+
+
+    </insert>
+
+    <!--更新用户-->
+    <update id="updateUser" parameterType="com.platform.idleplatform.user.entity.UserInfo">
+        update
+        t_user
+        set
+        account = #{account},
+        password = #{password},
+        user_name = #{userName},
+        image_path = #{imagePath},
+        role = #{role},
+        update_time = now()
+        where
+        user_id = #{userId}
+    </update>
+
+    <!--获取用户-->
+    <select id="getUserByPage" resultType="com.platform.idleplatform.user.entity.UserInfo">
+        select
+        user_id,
+        account,
+        password,
+        user_name,
+        image_path,
+        role
+        from
+        t_user
+        order by
+        update_time
+        desc
+    </select>
+
+    <!--查询粉丝列表-->
+    <select id="getFansList" parameterType="java.lang.String"
+            resultType="com.platform.idleplatform.user.entity.UserInfo">
+        select
+        image_path,
+        user_name,
+        t_user.user_id
+        from
+        t_fans,
+        t_user
+        where
+        fans = #{userId}
+        and
+        t_fans.user_id = t_user.user_id
+    </select>
+
+    <!--查询关注列表-->
+    <select id="getAttenList" parameterType="java.lang.String"
+            resultType="com.platform.idleplatform.user.entity.UserInfo">
+        select
+        image_path,
+        user_name,
+        t_user.user_id
+        from
+        t_fans,
+        t_user
+        where
+        t_fans.user_id = #{userId}
+        and
+        t_fans.user_id = t_user.user_id
+    </select>
+
+    <!--删除用户-->
+    <delete id="delUser" parameterType="java.lang.String">
+        delete from
+        t_user
+        where
+        user_id = #{userId}
+    </delete>
+</mapper>

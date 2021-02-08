@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.platform.idleplatform.order.dao.OrderDao">
+    <!--新增卖出的商品-->
+    <insert id="addOrder" parameterType="com.platform.idleplatform.goods.entity.OrderInfo">
+        insert into
+        t_order (
+        order_id,
+        goods_id,
+        buyer,
+        address_id,
+        state,
+        update_time
+        )
+        values(
+        #{orderId},
+        #{goodsId},
+        #{buyer},
+        #{addressId},
+        0,
+        now()
+        )
+    </insert>
+
+    <!--获取买到的商品-->
+    <select id="getBuyList" parameterType="java.lang.String"
+            resultType="com.platform.idleplatform.goods.entity.OrderInfo">
+        SELECT
+        order_id,
+        t_goods.goods_id goodsId,
+        title,
+        url indexPath,
+        price,
+        shipping,
+        t_order.buyer,
+        image_path,
+        user_name
+        FROM
+        t_goods,
+        t_image,
+        t_user,
+        t_order
+        WHERE
+        t_goods.goods_id = t_image.goods_id
+        AND goods_order = 0
+        AND t_user.user_id = t_goods.user_id
+        AND t_order.goods_id = t_goods.goods_id
+        AND t_order.buyer = #{buyer}
+        ORDER BY
+        t_order.update_time
+        DESC
+    </select>
+
+    <!--获取卖出的商品-->
+    <select id="getSellList" parameterType="java.lang.String"
+            resultType="com.platform.idleplatform.goods.entity.OrderInfo">
+        SELECT
+        order_id,
+        t_goods.goods_id goodsId,
+        title,
+        url indexPath,
+        price,
+        shipping,
+        t_order.buyer,
+        image_path,
+        user_name
+        FROM
+        t_goods,
+        t_image,
+        t_user,
+        t_order
+        WHERE
+        t_goods.goods_id = t_image.goods_id
+        AND goods_order = 0
+        AND t_user.user_id = t_order.buyer
+        AND t_order.goods_id = t_goods.goods_id
+        AND t_goods.user_id = #{userId}
+        ORDER BY
+        t_order.update_time
+        DESC
+    </select>
+
+    <!--获取订单是否存在-->
+    <select id="getIsOrder" parameterType="com.platform.idleplatform.order.entity.BuyInfo"
+            resultType="java.lang.Integer">
+        SELECT
+        COUNT(*)
+        FROM
+        t_order
+        WHERE
+        (buyer = #{user1}
+        OR
+        buyer = #{user2} )
+        AND
+        goods_id = #{goodsId}
+    </select>
+
+    <!--获取订单状态-->
+    <select id="getOrderState" parameterType="com.platform.idleplatform.order.entity.BuyInfo"
+            resultType="com.platform.idleplatform.order.entity.OrderInfo">
+        select
+        state,
+        order_id
+        FROM
+        t_order
+        WHERE
+        (buyer = #{user1}
+        OR
+        buyer = #{user2} )
+        AND
+        goods_id = #{goodsId}
+    </select>
+
+    <!--快递发货-->
+    <update id="shipGoods" parameterType="com.platform.idleplatform.order.entity.ExpressInfo">
+        update
+        t_order
+        set
+        express_no = #{expressNo},
+        express_code = #{expressCode},
+        state = 1
+        where
+        order_id = #{orderId}
+    </update>
+
+    <!--获取快递公司-->
+    <select id="getExpress" resultType="com.platform.idleplatform.order.entity.ExpressInfo">
+        select
+        express_code,
+        express_name
+        from
+        t_express
+    </select>
+
+    <!--获取订单快递信息-->
+    <select id="getOrderExpress" parameterType="java.lang.String"
+            resultType="com.platform.idleplatform.order.entity.ExpressInfo">
+        select
+        express_code,
+        express_no,
+        state
+        from
+        t_order
+        where
+        order_id = #{orderId}
+    </select>
+
+    <!--改变订单状态-->
+    <update id="changeState" parameterType="com.platform.idleplatform.order.entity.OrderInfo">
+        update
+        t_order
+        set
+        state = #{state}
+        where
+        order_id = #{orderId}
+    </update>
+
+</mapper>

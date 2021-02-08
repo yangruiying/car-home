@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.platform.idleplatform.chat.dao.ChatDao">
+
+    <insert id="addChat" parameterType="com.platform.idleplatform.chat.entity.ChatInfo">
+        insert into
+        t_chat
+        (
+        user1,
+        user2,
+        msg,
+        goods_id,
+        chat_time
+        )
+        values (
+        #{user1},
+        #{user2},
+        #{msg},
+        #{goodsId},
+        now()
+        )
+    </insert>
+
+    <!--查找聊天列表-->
+    <select id="chatList" parameterType="java.lang.String" resultType="com.platform.idleplatform.chat.entity.ChatList">
+        SELECT
+        *,
+        (
+        SELECT
+        msg
+        FROM
+        t_chat
+        WHERE
+        ((t_chat.user1 = b.userId
+        AND t_chat.user2 = #{userId})
+        OR
+        (t_chat.user2 = b.userId
+        AND t_chat.user1 = #{userId}))
+        AND t_chat.goods_id = b.goodsId
+        ORDER BY
+        chat_time DESC
+        LIMIT 0,
+        1
+        ) msg,
+        (
+        SELECT
+        chat_time
+        FROM
+        t_chat
+        WHERE
+        ((t_chat.user1 = b.userId
+        AND t_chat.user2 = #{userId})
+        OR
+        (t_chat.user2 = b.userId
+        AND t_chat.user1 = #{userId}))
+        AND t_chat.goods_id = b.goodsId
+        ORDER BY
+        chat_time DESC
+        LIMIT 0,
+        1
+        ) chat_time,
+        (
+        SELECT
+        COUNT(*)
+        FROM
+        t_chat
+        WHERE
+        (
+        t_chat.user1 = b.userId
+        )
+        AND t_chat.goods_id = b.goodsId
+        AND t_chat.is_read = 0
+        AND t_chat.user2 = #{userId}
+        ) readCount,
+        (
+        SELECT
+        state
+        FROM
+        t_order
+        WHERE
+        (
+        buyer = #{userId}
+        OR buyer = b.userId
+        )
+        AND goods_id = b.goodsId
+        ORDER BY
+        t_order.update_time DESC
+        LIMIT 0,
+        1
+        ) state
+        FROM
+        (
+        SELECT
+        *
+        FROM
+        (
+        SELECT
+        user1 userId,
+        t_chat.goods_id goodsId,
+        t_goods.user_id own,
+        image_path,
+        url indexPath,
+        user_name,
+        price
+        FROM
+        t_chat,
+        t_user,
+        t_image,
+        t_goods
+        WHERE
+        user2 = #{userId}
+        AND user1 = t_user.user_id
+        AND t_chat.goods_id = t_image.goods_id
+        AND t_image.goods_order = 0
+        AND t_goods.goods_id = t_chat.goods_id
+        UNION ALL
+        SELECT
+        user2 userId,
+        t_chat.goods_id goodsId,
+        t_goods.user_id own,
+        image_path,
+        url indexPath,
+        user_name,
+        price
+        FROM
+        t_chat,
+        t_user,
+        t_image,
+        t_goods
+        WHERE
+        user1 = #{userId}
+        AND user2 = t_user.user_id
+        AND t_chat.goods_id = t_image.goods_id
+        AND t_image.goods_order = 0
+        AND t_goods.goods_id = t_chat.goods_id
+        ) a
+        GROUP BY
+        userId,
+        goodsId,
+        image_path,
+        indexPath,
+        user_name,
+        price,
+        own
+        ) b
+        ORDER BY
+        chat_time
+        DESC
+    </select>
+
+    <!--查找聊天记录-->
+    <select id="chatRecard" parameterType="com.platform.idleplatform.chat.entity.ChatInfo"
+            resultType="com.platform.idleplatform.chat.entity.ChatInfo">
+        SELECT
+        *
+        FROM
+        t_chat
+        WHERE
+        (
+        (
+        user1 = #{user1}
+        AND user2 = #{user2}
+        )
+        OR (
+        user1 = #{user2}
+        AND user2 = #{user1}
+        )
+        )
+        AND goods_id = #{goodsId}
+        ORDER BY chat_time
+    </select>
+
+    <!--获取最新消息-->
+    <select id="getNewMsg" parameterType="com.platform.idleplatform.chat.entity.ChatInfo"
+            resultType="com.platform.idleplatform.chat.entity.ChatInfo">
+        SELECT
+        *
+        FROM
+        t_chat
+        WHERE
+        (
+        (
+        user1 = #{user1}
+        AND user2 = #{user2}
+        )
+        OR (
+        user1 = #{user2}
+        AND user2 = #{user1}
+        )
+        )
+        AND goods_id = #{goodsId}
+        ORDER BY
+        chat_time DESC
+        LIMIT 0,1
+    </select>
+
+    <!--设置消息已读-->
+    <update id="setRead" parameterType="com.platform.idleplatform.chat.entity.ChatInfo">
+        update
+        t_chat
+        set
+        is_read = 1
+        WHERE
+        (
+        user1 = #{user2}
+        AND user2 = #{user1}
+        )
+        AND goods_id = #{goodsId}
+    </update>
+
+    <!--查询未读消息-->
+    <select id="noReadCount" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select
+        count(*)
+        from
+        t_chat
+        where
+        user2 = #{userId}
+        AND
+        is_read = 0
+    </select>
+</mapper>
