@@ -525,4 +525,15 @@
         ORDER BY
         t_collection.update_time DESC
     </select>
+
+    <select id="getGoodsBySortId" parameterType="java.lang.String" resultType="com.platform.idleplatform.goods.entity.GoodsInfo">
+        select
+            goods_id,
+            title,
+            price
+        from
+            t_goods
+        where
+            second_sort = #{sortId}
+    </select>
 </mapper>

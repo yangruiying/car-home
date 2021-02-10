@@ -54,4 +54,6 @@ public interface GoodsDao {
     int getCollection(String userId);
 
     List<GoodsInfo> getCollectionList(String userId);
+
+    List<GoodsInfo> getGoodsBySortId(String sortId);
 }

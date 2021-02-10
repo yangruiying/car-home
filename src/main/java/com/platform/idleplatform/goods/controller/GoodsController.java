@@ -1,5 +1,6 @@
 package com.platform.idleplatform.goods.controller;
 
+import com.platform.idleplatform.goods.dao.GoodsDao;
 import com.platform.idleplatform.goods.entity.GoodsInfo;
 import com.platform.idleplatform.goods.entity.OrderInfo;
 import com.platform.idleplatform.goods.service.GoodsService;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 @RestController
 @RequestMapping("/goods")
@@ -19,6 +21,8 @@ public class GoodsController {
     @Resource
     GoodsService goodsService;
 
+    @Resource
+    GoodsDao goodsDao;
     @RequestMapping(value = "getGoodsList")
     AppResponse getGoodsList(GoodsInfo goodsInfo) {
         return goodsService.getGoodsList(goodsInfo);
@@ -117,5 +121,11 @@ public class GoodsController {
     @RequestMapping("getCollectionList")
     AppResponse getCollectionList(String userId) {
         return goodsService.getCollectionList(userId);
+    }
+
+    @RequestMapping("getGoodsBySortId")
+    AppResponse getGoodsBySortId(String sortId){
+        List<GoodsInfo> goodsBySortId = goodsDao.getGoodsBySortId(sortId);
+        return AppResponse.success("查询成功",goodsBySortId);
     }
 }

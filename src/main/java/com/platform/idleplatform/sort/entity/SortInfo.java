@@ -13,4 +13,6 @@ public class SortInfo {
     public List<GoodsListInfo> goodsList;
     public List <SortInfo> firstSortList;
     public String carIcon;
+    public String carSort;
+    public String status;
 }

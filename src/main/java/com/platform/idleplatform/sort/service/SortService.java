@@ -1,6 +1,7 @@
 package com.platform.idleplatform.sort.service;
 
 import com.platform.idleplatform.sort.dao.SortDao;
+import com.platform.idleplatform.sort.entity.SortInfo;
 import com.platform.idleplatform.tool.AppResponse;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +16,7 @@ public class SortService {
         return AppResponse.success("查询成功", sortDao.getFirstSort());
     }
 
-    public AppResponse getSecondSort(String sortId) {
-        return AppResponse.success("查询成功", sortDao.getSecondSort(sortId));
+    public AppResponse getSecondSort(SortInfo sortInfo) {
+        return AppResponse.success("查询成功", sortDao.getSecondSort(sortInfo));
     }
 }

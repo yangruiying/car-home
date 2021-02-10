@@ -66,7 +66,7 @@ public class GoodsService {
     }
 
     public AppResponse addLeaveMessage(GoodsInfo goodsInfo) {
-        goodsInfo.setlId(StringUtil.getCommonCode(2));
+        goodsInfo.setLId(StringUtil.getCommonCode(2));
         goodsDao.addLeaveMessage(goodsInfo);
         return AppResponse.success("查询成功");
     }
@@ -77,7 +77,7 @@ public class GoodsService {
     }
 
     public AppResponse addRecover(GoodsInfo goodsInfo) {
-        goodsInfo.setlId(StringUtil.getCommonCode(2));
+        goodsInfo.setLId(StringUtil.getCommonCode(2));
         goodsDao.addRecover(goodsInfo);
         return AppResponse.success("新增成功");
     }

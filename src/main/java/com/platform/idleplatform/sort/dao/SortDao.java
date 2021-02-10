@@ -7,7 +7,9 @@ import java.util.List;
 
 @Mapper
 public interface SortDao {
-    public List<SortInfo> getFirstSort();
+    List<SortInfo> getFirstSort();
 
-    public List<SortInfo> getSecondSort(String sortId);
+    List<SortInfo> getSecondSort(SortInfo sortInfo);
+
+    List<SortInfo> getCarSort(String sortId);
 }

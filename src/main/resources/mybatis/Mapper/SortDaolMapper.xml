@@ -36,11 +36,18 @@
     <select id="getSecondSort" parameterType="java.lang.String" resultMap="BaseTreeResultMap">
         select
         name,
-        sort_id
+        sort_id,
+        car_icon
         from
         t_sort
         where
         parent_id = #{sortId}
+        <if test="carSort != null and carSort != ''">
+        and car_sort = #{carSort}
+        </if>
+        <if test="status != null and status != ''">
+        and status = #{status}
+        </if>
     </select>
 
     <!--获取二级分类和商品-->
@@ -64,5 +71,16 @@
         AND second_sort = #{sortId}
         AND a.user_id = t_user.user_id
         AND (a.state != -1 AND a.state != 2)
+    </select>
+
+    <select id="getCarSort" parameterType="java.lang.String" resultType="com.platform.idleplatform.sort.entity.SortInfo">
+        select
+            car_sort
+        from
+            t_sort
+        where
+            parent_id = #{sortId}
+        group by
+            car_sort
     </select>
 </mapper>

@@ -1,6 +1,7 @@
 package com.platform.idleplatform.imageUpload.controller;
 
 
+import com.platform.idleplatform.annotation.IgnoreAuth;
 import com.platform.idleplatform.imageUpload.service.UpLoadService;
 import com.platform.idleplatform.tool.AppResponse;
 import org.slf4j.Logger;
@@ -27,6 +28,7 @@ public class UpLoadController {
      * @return
      */
     @RequestMapping(value = "uploadImage")
+    @IgnoreAuth
     AppResponse uploadImage(MultipartFile imageFile) {
         try {
             return upLoadService.upLoadImage(imageFile);
