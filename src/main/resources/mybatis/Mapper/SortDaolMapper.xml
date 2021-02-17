@@ -84,11 +84,17 @@
         </if>
         ) c
         where 1=1
-        <if test="minPrice != null and minPrice != ''">
+        <if test="minPrice != 0">
         and min_price &gt; #{minPrice}
         </if>
-        <if test="maxPrice != null and maxPrice != ''">
+        <if test="maxPrice != 0">
         and min_price &lt; #{maxPrice}
+        </if>
+        <if test="orderType == 0">
+        order by min_price asc
+        </if>
+        <if test="orderType == 1">
+        order by min_price desc
         </if>
     </select>
 

@@ -3,7 +3,7 @@
 <mapper namespace="com.platform.idleplatform.goods.dao.GoodsDao">
     <!--获取商品-->
     <select id="listGoodsByPage" parameterType="com.platform.idleplatform.goods.entity.GoodsInfo"
-            resultType="com.platform.idleplatform.goods.entity.GoodsInfo">
+            resultMap="base">
         SELECT
         t_goods.goods_id goodsId,
         title,
@@ -46,6 +46,11 @@
         ORDER BY
         t_goods.update_time DESC
     </select>
+
+    <resultMap id="base" type="com.platform.idleplatform.goods.entity.GoodsInfo">
+        <collection property="imgLists" column="goodsId" javaType="java.util.ArrayList" select="getImgList"></collection>
+    </resultMap>
+
 
     <!--获取商品-->
     <select id="getAttenGoodsList" parameterType="java.lang.String"
@@ -164,6 +169,9 @@
         t_image
         where
         goods_id =#{goodsId}
+        order by
+        goods_order
+        limit 3
     </select>
 
     <!--获取发布的商品-->

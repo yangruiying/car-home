@@ -42,4 +42,6 @@ public class GoodsInfo {
 
     private String carIcon;
 
+    private List<ImgList> imgLists;
+
 }

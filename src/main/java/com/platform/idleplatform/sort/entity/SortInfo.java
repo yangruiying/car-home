@@ -18,4 +18,5 @@ public class SortInfo {
     private String isTop;
     private Double minPrice;
     private Double maxPrice;
+    private Integer orderType;
 }
