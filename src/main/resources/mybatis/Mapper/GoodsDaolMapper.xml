@@ -45,7 +45,6 @@
         </if>
         ORDER BY
         t_goods.update_time DESC
-
     </select>
 
     <!--获取商品-->
@@ -80,6 +79,7 @@
         AND t_goods.user_id in (SELECT fans user_id FROM t_fans WHERE user_id = #{userId})
         AND (t_goods.state != -1 AND t_goods.state != 2)
     </select>
+
 
     <!--根据获取商品详情信息-->
     <select id="getGoodsQuery" resultType="com.platform.idleplatform.goods.entity.GoodsInfo">

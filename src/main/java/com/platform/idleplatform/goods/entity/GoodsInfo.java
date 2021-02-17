@@ -41,4 +41,5 @@ public class GoodsInfo {
     private int pageSize;
 
     private String carIcon;
+
 }

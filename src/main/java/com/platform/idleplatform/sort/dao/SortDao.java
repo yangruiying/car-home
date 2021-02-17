@@ -12,4 +12,8 @@ public interface SortDao {
     List<SortInfo> getSecondSort(SortInfo sortInfo);
 
     List<SortInfo> getCarSort(String sortId);
+
+    List<SortInfo> getTopCar();
+
+    List<SortInfo> searchCar(SortInfo sortInfo);
 }

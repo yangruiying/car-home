@@ -36,4 +36,18 @@ public class SortController {
         return AppResponse.success("查询成功",carSort);
     }
 
+    @RequestMapping("getTopCar")
+    public AppResponse getTopCar(){
+        List<SortInfo> carSort = sortDao.getTopCar();
+        return AppResponse.success("查询成功",carSort);
+    }
+
+    @RequestMapping("searchCar")
+    public AppResponse searchCar(SortInfo sortInfo){
+        List<SortInfo> carSort = sortDao.searchCar(sortInfo);
+        return AppResponse.success("查询成功",carSort);
+    }
+
+
+
 }

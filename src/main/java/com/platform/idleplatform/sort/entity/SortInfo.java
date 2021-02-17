@@ -15,4 +15,7 @@ public class SortInfo {
     public String carIcon;
     public String carSort;
     public String status;
+    private String isTop;
+    private Double minPrice;
+    private Double maxPrice;
 }
