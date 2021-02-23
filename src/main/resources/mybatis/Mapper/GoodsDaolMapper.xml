@@ -5,49 +5,71 @@
     <select id="listGoodsByPage" parameterType="com.platform.idleplatform.goods.entity.GoodsInfo"
             resultMap="base">
         SELECT
-        t_goods.goods_id goodsId,
-        title,
-        intro,
-        url indexPath,
-        price,
-        t_goods.user_id,
-        image_path,
-        user_name,
-        a.`name` firstSortName,
-        b.`name` secondSortName,
-        state,
-        (
-        SELECT
-        COUNT(*)
+            t_goods.goods_id goodsId,
+            title,
+            intro,
+            url indexPath,
+            price,
+            t_goods.user_id,
+            image_path,
+            user_name,
+            a.`name` firstSortName,
+            b.`name` secondSortName,
+            t_goods.first_sort,
+            t_goods.second_sort,
+            state,
+            t_goods.update_time,
+            (
+                SELECT
+                    COUNT(*)
+                FROM
+                    t_favor b
+                WHERE
+                    t_goods.goods_id = b.goods_id
+            ) favor,
+            t_goods.update_time
         FROM
-        t_favor b
+            t_goods
+        LEFT JOIN t_image ON t_goods.goods_id = t_image.goods_id
+        LEFT JOIN t_user ON t_user.user_id = t_goods.user_id
+        LEFT JOIN t_sort a ON t_goods.first_sort = a.sort_id
+        LEFT JOIN t_sort b ON t_goods.second_sort = b.sort_id
         WHERE
-        t_goods.goods_id = b.goods_id
-        ) favor,
-        t_goods.update_time
-        FROM
-        t_goods,
-        t_image,
-        t_user,
-        t_sort a,
-        t_sort b
-        WHERE
-        t_goods.goods_id = t_image.goods_id
-        AND goods_order = 0
-        AND t_user.user_id = t_goods.user_id
-        AND t_goods.first_sort = a.sort_id
-        AND t_goods.second_sort = b.sort_id
+            goods_order = 0
         <if test="state != 0 ">
             AND state = #{state}
         </if>
         <if test="title != null">
             AND title LIKE concat ('%',#{title},'%')
         </if>
-        ORDER BY
-        t_goods.update_time DESC
+        <if test="type != null">
+            AND type = #{type}
+        </if>
+        <if test="sortId != null and sortId != ''">
+            AND t_goods.second_sort = #{sortId}
+        </if>
+        <if test="firstSort != null and firstSort != ''">
+            AND t_goods.first_sort = #{firstSort}
+        </if>
+        <if test="minPrice != 0 and minPrice != null">
+        and price &gt; #{minPrice}
+        </if>
+        <if test="maxPrice != 0 and minPrice != null">
+        and price &lt; #{maxPrice}
+        </if>
+        <if test="orderType == 0">
+        order by price asc
+        </if>
+        <if test="orderType == 1">
+        order by price desc
+        </if>
+        <if test="orderType == null ">
+        order by t_goods.update_time desc
+        </if>
     </select>
 
     <resultMap id="base" type="com.platform.idleplatform.goods.entity.GoodsInfo">
+        <result column="goodsId" property="goodsId"></result>
         <collection property="imgLists" column="goodsId" javaType="java.util.ArrayList" select="getImgList"></collection>
     </resultMap>
 
@@ -126,7 +148,8 @@
         state,
         first_sort,
         second_sort,
-        update_time
+        update_time,
+        type
         )
         values (
         #{goodsId},
@@ -140,7 +163,8 @@
         -1,
         #{firstSort},
         #{secondSort},
-        now()
+        now(),
+        #{type}
         )
     </insert>
 
@@ -536,12 +560,17 @@
 
     <select id="getGoodsBySortId" parameterType="java.lang.String" resultType="com.platform.idleplatform.goods.entity.GoodsInfo">
         select
-            goods_id,
+            t_goods.goods_id,
             title,
-            price
+            price,
+            url indexPath
         from
             t_goods
+        LEFT JOIN t_image
+            ON t_goods.goods_id = t_image.goods_id
         where
             second_sort = #{sortId}
+        AND
+            goods_order = 0
     </select>
 </mapper>

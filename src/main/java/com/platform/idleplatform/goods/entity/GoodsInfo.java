@@ -44,4 +44,11 @@ public class GoodsInfo {
 
     private List<ImgList> imgLists;
 
+    private Integer type;
+
+    private Integer orderType;
+
+    private Integer minPrice;
+
+    private Integer maxPrice;
 }

@@ -22,6 +22,7 @@
         select
         name,
         sort_id,
+        name,
         first_char,
         car_icon
         from
@@ -51,8 +52,8 @@
         name,
         sort_id,
         car_icon,
-        (select min(price) from t_goods a group by a.second_sort having a.second_sort = b.sort_id  ) min_price,
-        (select max(price) from t_goods a group by a.second_sort having a.second_sort = b.sort_id  ) max_price
+        (select min(price) from t_goods a where a.type = 1 group by a.second_sort having a.second_sort = b.sort_id) min_price,
+        (select max(price) from t_goods a where a.type = 1 group by a.second_sort having a.second_sort = b.sort_id) max_price
         from
         t_sort b
         where
@@ -70,8 +71,8 @@
         name,
         sort_id,
         car_icon,
-        (select min(price) from t_goods a group by a.second_sort having a.second_sort = b.sort_id  ) min_price,
-        (select max(price) from t_goods a group by a.second_sort having a.second_sort = b.sort_id  ) max_price
+        (select min(price) from t_goods a where a.type = 1 group by a.second_sort having a.second_sort = b.sort_id) min_price,
+        (select max(price) from t_goods a where a.type = 1 group by a.second_sort having a.second_sort = b.sort_id) max_price
         from
         t_sort b
         where
